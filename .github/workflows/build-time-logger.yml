@@ -1,0 +1,33 @@
+name: Build BVI Time Logger
+
+on:
+  push:
+    paths:
+      - "bvi-time-logger/**"
+      - ".github/workflows/build-time-logger.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install packages
+        run: pip install -r bvi-time-logger/requirements.txt pyinstaller==6.11.1
+
+      - name: Check it compiles
+        run: python -m py_compile bvi-time-logger/time_logger.py
+
+      - name: Build exe
+        working-directory: bvi-time-logger
+        run: pyinstaller --onefile --noconsole --name "BVI_Time_Logger" time_logger.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BVI_Time_Logger
+          path: bvi-time-logger/dist/BVI_Time_Logger.exe
